@@ -4,11 +4,12 @@ import time
 import re
 import json
 def readAPRule(start, tstamp):
-    fo = open('/home/work/idata/price/dict/base/auto_price_rule.dict','r')
+    fo = open('auto_price_rule.dict','r')
     ruleBuf = fo.readlines()
     for cnt in range(start,len(ruleBuf)) :
         content = re.sub(r'\n', "", ruleBuf[cnt])
         tmprule = content.split('\t')
+        print tmprule
         if tmprule[2] == tstamp :
             print tmprule
             fo.close()
@@ -18,11 +19,10 @@ def readAPRule(start, tstamp):
         else :
             offset = 0
             rule = 0
-
     return offset,rule
 
 def readAPInfo(id):
-    fo = open('/home/work/idata/price/dict/base/auto_price_info.dict','r')
+    fo = open('auto_price_info.dict','r')
     infoBuf = fo.readlines()
     for cnt in range(0,len(infoBuf)):
         content = re.sub(r'\n',"", infoBuf[cnt])
