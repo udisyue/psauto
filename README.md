@@ -1,1 +1,1 @@
-price auto
+price auto  1.1
