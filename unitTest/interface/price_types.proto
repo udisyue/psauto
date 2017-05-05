@@ -1,0 +1,398 @@
+//real time price search service interface
+
+//Explanation abbreviations
+//  As     Advanced Search
+//  Price  Price Search
+//  Oa     Ota Adaptor
+//  Pc     PreCrawl
+
+package  price;
+
+option cc_generic_services = true;  //support c++ language
+option py_generic_services = true;  //support python language
+
+// 用户信息
+message UserInfo {
+    optional string user_ip                                 = 1; // 用户ip
+    optional string session_id                              = 2; // session_id
+    optional string cookie_id                               = 3; // cookie_id
+    optional string user_agent                              = 4; // user_agent
+    // web(2),offline(4),travel_guide(8)
+    // app(16),h5(32),cache_api(64),api(128)
+    // tts(256),precrawl(512), lru(1024)
+    optional int32  booking_channel                         = 5; // 渠道 web/app/h5/nbapi
+    optional int32  order_from                              = 6; // 订单来源
+    optional int32  customer_level                          = 7; // 用户等级
+    repeated int32  activity_id_list                        = 8; // 用户可用红包列表
+ 	optional string  user_id                                = 9; // 登陆会员会员卡号            
+    optional string  device_id                              = 10; // 用户设备号【app设备号】【h5/pc cookie中用户唯一标识】
+    optional RequestType request_type                       = 11; // 用户身份识别
+};
+
+// 请求类型
+enum RequestType {
+    NORMAL                                                  = 1; // 正常请求
+    CACHE                                                   = 2; // 缓存请求         
+    CRAWLER                                                 = 3; // 爬虫请求
+}
+
+// 酒店售卖状态
+enum HotelStatus {
+    FAILED                                                  = 1;
+    SUCCESS_STOCK                                           = 2; // 有库存
+    SUCCESS_SOLDOUT                                         = 3; // 已卖完
+};
+
+// 酒店预订状态
+enum BookingStatus {
+    BOOKING_FAIL                                            = 1; // 不可订
+    BOOKING_SUCC                                            = 2; // 可订
+}
+
+// 调价类型
+enum PriceModifyType {
+    AUTO                                                    = 1; // 自动调价
+    AUTO_VEST                                               = 2; // 自动马甲调价
+    MANUAL                                                  = 3; // 手动调价
+    MANUAL_VEST                                             = 4; // 手动马甲调价
+}
+
+enum PromotionType {
+    SCORECARD                                               = 1;  //积分卡
+    CASHBACK                                                = 2;  //返现
+    GIFTCARD                                                = 3;  //礼品卡
+    DISCOUNT                                                = 4;  //立减、打折
+    CHINESESUPERIOR                                         = 5;  //华人优待
+    COUPON                                                  = 6;  //当前红包
+    AVAIL_COUPON_LIST                                       = 7;  //可用红包列表
+    GIFT                                                    = 8;  //赠送礼品
+    MOBILE_ONLY                                             = 9;  //自定义手机专项
+    AVAIL_DISCOUNT_LIST                                     = 10;  //可用折扣列表
+    AVAIL_PACKAGE_LIST                                      = 11;  //可用礼包列表
+    MBL_VEST_FEATURE                                        = 12;  // MBL马甲服务指标
+    PRICE_MODIFY                                            = 13;  // 调价 {"op_code":"*","op_val":0.95,"op_type":1}
+
+    OTA_SCORECARD                                           = 101;  //积分卡
+    OTA_CASHBACK                                            = 102;  //返现
+    OTA_GIFTCARD                                            = 103;  //礼品卡
+    OTA_DISCOUNT                                            = 104;  //立减、打折
+    OTA_CHINESESUPERIOR                                     = 105;  //华人优待
+    OTA_COUPON                                              = 106;  //当前红包
+    OTA_AVAIL_COUPON_LIST                                   = 107;  //可用红包列表
+    OTA_GIFT                                                = 108;  //赠送礼品
+    OTA_MOBILE_ONLY                                         = 109;  //供应商手机专享
+    OTA_AVAIL_DISCOUNT_LIST                                 = 110;  //可用折扣列表
+
+    OTA_CUSTOMIZED                                          = 201;  //供应商自定义促销
+};
+
+// 标签分类
+enum TagType {
+    C_BOOKINGRATE_TAG                                       = 101;  // 城市入住率
+    C_TOPIC_TAG                                             = 102;  // 城市主题
+    C_ADCARD_TAG                                            = 103;  //广告
+
+    H_REVIEW_TAG                                            = 201;  // 酒店点评
+    H_PRICE_TAG                                             = 202;  // 酒店最低价
+    H_ADCARD_TAG                                            = 203;  //广告
+    
+    P_QUALITY_TAG                                           = 301;  // 产品服务质量
+    P_PRICE_TAG                                             = 302;  // 产品价格优势
+    P_ADCARD_TAG                                            = 303;  //广告
+    P_CONFIRM_TAG                                           = 304;  //确认率
+
+};
+
+enum PayType {
+    PRE_PAY                                                 = 1;  // 预付 
+    CASH_PAY                                                = 2;  // 现付
+}
+
+message CreditCard {                                                                                                                       
+    optional string ota_bankcode                            = 1;  // OTA信用卡代码 
+    optional string elong_bankcode                          = 2;  // 艺龙信用卡代码
+    optional bytes card_desc                                = 3;  // 信用卡名称描述
+}
+
+enum ChargePriceMode {
+      NO_SUCH_CHARGE                                        = 0;
+      CHARGE_IS_PER_STAY                                    = 1;
+      CHARGE_IS_PER_PERSON_PER_STAY                         = 2;
+      CHARGE_IS_PER_NIGHT                                   = 3; 
+      CHARGE_IS_PER_PERSON_AND_NIGHT_0                      = 4;
+      CHARGE_IS_A_PERCENTAGE                                = 5; 
+      CHARGE_IS_PER_PERSON_AND_NIGHT_1                      = 6; // 和4理论上一样，兼容booking
+      CHARGE_IS_INCALCULABLE                                = 7;
+      CHARGE_IS_INCALCULABLE_Croatia                        = 8;
+}
+
+enum ChargePriceType {
+      UNKNOWN                                               = 0;
+      TAXANDSERVICEFEE                                      = 1;
+      EXTRAPERSONFEE                                        = 2;
+}
+
+// 担保和押金
+message GuaranteeAndDeposit {
+    optional bool cc_required                               = 1 [default = false];  // 是否需要信用卡号
+    optional bool cvc_required                              = 2 [default = false];  // 是否需要信用卡背面Card Validation Code
+    optional bool guarantee_required                        = 3 [default = false];  // 是否需要担保
+    optional PriceItem guarantee_amount                     = 4;                    // 担保金额，根据OTA要求填写
+    optional bool deposit_required                          = 5 [default = false];  // 是否需要押金
+    optional PriceItem deposit_amount                       = 6;                    // 押金金额，根据OTA要求填写
+};
+
+// 促销信息 
+message PromotionInfo {
+    optional PromotionType type                             = 1; // 促销类型
+    optional string      value                              = 2; // 促销类型取值
+};
+
+// feature tags 
+message Tag {
+    optional TagType 	 type                               = 1; // 标签类型
+    optional string      value                              = 2; // 标签取值json格式
+};
+
+message FilterTag {
+    optional TagType type                                   = 1;//筛选标签类型
+    optional int32   tag_id                                 = 2;//tag id
+}
+
+message CancellationInfo {
+    optional string start_date                              = 1;  //开始日期，北京时间,标准时间格式 '2015-02-12 19:19:00',必填
+    optional string local_start_date                        = 2;  //酒店所在地开始日期,标准时间格式 '2015-02-12 19:19:00',选填
+    optional string end_date                                = 3;  //截止日期,北京时间,标准时间格式 '2015-02-12 19:19:00',必填
+    optional string local_end_date                          = 4;  //酒店所在地截止日期,标准时间格式 '2015-02-12 19:19:00',选填
+    optional string refundable                              = 5;  //标识该时间段内是否可以取消，1，可以取消，0，不能取消,必填
+    optional PriceItem customer_price                       = 6;  //取消扣除客人金额对象，如果是可以取消必填
+    optional PriceItem supplier_price                       = 7;  //给供应商结算的罚金对对象，如果是可以取消必填
+}
+
+// 所有涉及价格的字段均用该message表达
+// 所有价格值均为int精确到分
+message PriceItem {
+    required int64 amount                                   = 1;  //金额，必填
+    required string currency                                = 2 [default = "CNY"];  //币种代码，必填
+    optional double currency_rate                           = 3 [default = 1.0];  //汇率
+};   
+
+message DailyPrice {
+    optional string date                                    = 1;   // 日期格式 %Y-%m-%d
+    optional PriceItem price                                = 2;   // 当日价格
+};
+
+message BedType {
+    required string id                                      = 1; // 床型ID
+    required bytes bed_name_cn                              = 2; // 床型中文名称
+    optional bytes bed_name_en                              = 3; // 床型英文名称
+    optional int32 num                                      = 4; // 若无法分离出数量，此处不填
+    optional bytes size                                     = 5; // 床型尺寸 
+    optional bool is_ambiguous                              = 6[default = true]; // 是否为含糊床型
+};
+
+message BedGroup {
+    repeated BedType bed_type_list                          = 1;
+};
+
+message ChargePrice {
+    required PriceItem price                                = 1; // 附加收费金额
+    optional PriceItem price_ori                            = 2; // 外币收费金额 
+    required bytes description                              = 3; // 附加收费名称
+    optional ChargePriceType type                           = 4[default = UNKNOWN]; // 附加收费类型
+    optional bool included                                  = 5[default = true]; // 是否包含在总价中
+    optional ChargePriceMode charge_price_mode              = 6; // 收费模式(以何种单位收费) 
+    optional string charge_amount                           = 7; // 收费模式下的收费值(不限与金额)
+    optional string charge_amount_currency                  = 8; // 收费模式下的收费币种
+};
+
+// 膳食信息
+message BoardInfo {
+      required bool included                                = 1;
+      optional bytes description                            = 2;
+      optional int32 number                                 = 3;
+};
+
+message ImageLink {
+      optional string image_id                              = 1; 
+      optional string image_url                             = 2; // json串 
+};
+
+message ExtraCharge {
+    required PriceItem total                                = 1;  // 附加收费总金额，只算包含在总价中的，到点付款不算
+    required PriceItem total_ori                            = 2;  // 附加收费原始货币或外币总金额
+    repeated ChargePrice charge_price_list                  = 3;  // 附加收费类型，除了房费之外的费用
+};
+
+message RatePlan {
+    optional bool is_instant_confirm                        = 1 [default = true]; // 即时确认标识，默认true为及时确认
+    optional bool breakfast_included                        = 2 [default = false]; // 是否含早 
+    optional bool halfboard_included                        = 3 [default = false]; // 是否半膳
+    optional bool fullboard_included                        = 4 [default = false]; // 是否全膳 
+    optional bool internet_included                         = 5 [default = false]; // 是否有网络 
+    optional bool wifi_included                             = 6 [default = false]; // 是否有WIFI
+    optional int32 ota_promo_type                           = 7; // 0 normal, 1 手机特惠, 2 提前预定特惠 3 临近预定特惠 4 节日特惠
+    optional UserInfo user_info                             = 8; 
+    optional PayType pay_type                               = 9 [default = PRE_PAY]; // 付款方式
+    optional GuaranteeAndDeposit guarantee_and_deposit      = 10; // 担保和押金 
+    repeated PromotionInfo promotion_info_list              = 11; // 价格促销类型,供应商提供的
+    repeated CancellationInfo cancellation_info_list        = 12; // 取消规则列表
+    repeated CancellationInfo elong_cancellation_info_list  = 13; // 取消规则列表，取消价大于卖价设置为不可取消，合并不可取消的子节点
+};
+
+message ProductDesc {
+    repeated BoardInfo board_info_list                      = 1; // 膳食类型
+    repeated BedGroup product_bed_group                     = 2; // 床型信息列表
+    optional bytes rate_comment                             = 3; // 产品粒度重要提示
+    optional bytes prepay_desc                              = 4; // 担保规则或信用卡冻结规则 
+    optional bytes cancellation_desc_cn                     = 5; // 对于无法通过系统取消的规则(如现付酒店)，用文本描述
+    optional bytes cancellation_desc_en                     = 6; // 对于无法通过系统取消的规则(如现付酒店)，用英本描述
+    repeated CreditCard product_credit_card  				= 7; // 产品可用的信用卡列表
+};
+
+message RoomDesc {
+    optional bytes room_desc_text                           = 1; // 房型描述 
+    repeated BedGroup room_bed_group                        = 2; // 床型信息列表
+    repeated ImageLink image_link_list                      = 3; // 房型图片信息
+    optional bytes internet                                 = 4; // 房间网络接口
+    optional bytes smoking_preferences                      = 5; // 吸烟/无烟房 
+    optional bytes meal_desc                                = 6; // 膳食信息文案描述
+    optional bytes room_size                                = 7; // 房间大小描述 
+    optional int32 has_window                               = 8 [default = 2]; // 是否有窗 0无窗, 1有窗, 2未知
+    repeated bytes facility_list                            = 10; // 房间设施列表
+    optional bytes other_info                                 = 11; //房型的其他描述信息
+};
+
+message ProductFilter {
+    optional int32 filter_cancellation_type                 = 1;  // 具体值见编码表
+    optional int32 filter_paytype                           = 2;  
+    optional int32 filter_internet                          = 3;  
+    optional int32 filter_boards                            = 4;  
+    repeated int32 filter_beds                              = 5;  
+}   
+
+message ProductFilterStat {
+    repeated int32 filter_cancellation_type                 = 1;  // 具体值见编码表
+    repeated int32 filter_paytype                           = 2;  
+    repeated int32 filter_internet                          = 3;  
+    repeated int32 filter_boards                            = 4;  
+    repeated int32 filter_beds                              = 5;  
+}   
+
+message PriceInfo {
+    optional PriceItem total_price                          = 1; // 总价
+    optional PriceItem total_price_ori                      = 2; // 原币种总价
+    optional PriceItem total_room_price                     = 3; // 房价总价
+    optional ExtraCharge extra_charge                       = 4; // 除房价之外的其他收费
+    repeated DailyPrice daily_price_list                    = 5; // 价格日历    
+    optional PriceItem average_price                        = 6; // 均价
+    optional PriceItem average_room_price                   = 7; // 房价均价,计算规则，若total_room_price不为空，用total_room_price/天数,否则用total_price/天数
+    optional PriceItem addition_price                        = 8; // 附加价
+    optional PriceItem sort_price                            = 9; // 排序价
+};
+
+message PersonHold {
+    required int32 max_person_num                           = 1; // 最大入住总人数，必填
+    optional int32 max_adult_num                            = 2; // 最大入住成人数
+    optional int32 max_child_num                            = 3; // 最大小孩数
+    optional int32 max_child_age                            = 4; // 最大小孩年龄(超过可能造成预定失败)
+    optional int32 min_child_alone_age                      = 5; // 无大人陪同的最小儿童入住年龄
+};
+
+message Product {
+    required int64 elong_pid                                = 1; // elong全网唯一的产品ID
+    optional string ota_pid                                 = 3; // 供应商产品ID
+    optional bytes product_name_cn                          = 4; // 产品名称
+    optional bytes product_name_en                          = 5; // 产品名称
+    optional RatePlan rateplan                              = 6; // 产品规则 
+    optional ProductDesc product_desc                       = 8; // 产品描述
+    required int32 room_num                                 = 9; // 间数  
+    repeated PromotionInfo promotion_info                   = 10; // Ota提供+Elong自己的促销
+    optional ProductFilter product_filter                   = 11; // 用于筛选
+    optional string attachment                              = 12; //  
+    optional int64 product_feature                          = 13; // elong_pid计算中间值,产品特征值 
+    
+    // 全套价格中的某几个价格
+    optional PriceInfo booking_price                        = 20; // 成单价
+    optional PriceInfo cost_price                           = 21; // 成本价
+    optional PriceInfo origin_price                         = 22; // 原价
+    optional PriceInfo sale_price                           = 23; // 卖价
+    optional PriceInfo base_sale_price                      = 25; // 促销基础价
+
+    optional int32 source_ota_id                            = 50 [default = -1]; // 马甲产品的原供应商id
+    optional int64 ota_sign                                 = 51; // 供应商sign
+    optional string elong_pname                             = 52; // 订单校验时透传给ps的参数
+
+    repeated Tag tag                                        = 24; //  产品粒度tags
+};
+
+message Room {
+    optional int64 mroom_id                                 = 1; // 房型ID，用于关联房型描述
+    optional bytes mroom_name_cn                            = 2; // 房型名称
+    optional bytes mroom_name_en                            = 3; // 房型名称
+    required int64 room_id                                  = 4; // 房型ID，用于关联房型描述
+    optional bytes room_name_cn                             = 5; // 房型名称
+    optional bytes room_name_en                             = 6; // 房型名称
+    required int32 room_status                              = 7; // 0 close, 1 open
+    optional int32 allotment                                = 8 [default = -1]; // 库存
+    optional PersonHold person_hold                         = 9; // 该房型所能容纳的入住人组合
+    optional RoomDesc room_desc                             = 10; // 房型描述 
+    optional string attachment                              = 11; 
+    repeated Product product_list                           = 12; 
+
+    optional PriceInfo  base_price                          = 21; // Room粒度的基础价价
+
+};
+
+message MRoomDigest{
+    optional int64 mroom_id                                 = 1;//物理房型ID
+    optional bytes mroom_name_cn                            = 2; // 房型名称
+    optional bytes mroom_name_en                            = 3; // 房型名称
+    optional RoomDesc room_desc                             = 4;//物理房型描述信息
+}
+
+message DetailOta {
+    required int32 base_hotel_id                            = 1; // elong hotel id
+    optional int64 crawl_time                               = 2; // 最低价的抓取时间
+    optional PriceInfo  base_price                          = 3; // Ota粒度的基础价
+    repeated PromotionInfo promotion_info                   = 4; // 促销活动
+
+    required int32 ota_id                                   = 11; // elong分配的供应商ID
+    optional string ota_hotel_id                            = 12; // supplier hotel id
+    required HotelStatus hotel_status                       = 13; // 酒店状态
+    optional string attachment                              = 14; // ota_hotel_summary + ota_hotel_policy 
+    repeated Room room_list                                 = 15; // 房型列表
+};
+
+message DetailHotel {
+    required int32 base_hotel_id                            = 1; // elong hotel id
+    optional int64 crawl_time                               = 2; // 最低价的抓取时间
+    repeated PromotionInfo promotion_info                   = 4; // 促销活动
+    optional ProductFilterStat product_filter_stat          = 5; // 筛选项汇总
+    optional PriceInfo  base_price                          = 3; // Hotel粒度的基础价
+
+    repeated DetailOta detail_ota_list                      = 11; // 供应商列表
+    repeated Tag tag                                        = 12; //  酒店粒度tags
+    repeated MRoomDigest mroom_digest                           = 13; //物理房型描述信息
+};
+
+message ListOta {
+    optional int32 base_hotel_id                            = 1; // elong hotel id
+    optional int64 crawl_time                               = 2; // 最低价的抓取时间
+    required int32 ota_id                                   = 3; // elong分配的供应商ID
+    optional PriceInfo origin_price                         = 4; // Ota原价
+    optional PriceInfo sale_price                           = 5; // 卖价
+    repeated PromotionInfo promotion_info                   = 6; // 促销活动
+    optional PayType pay_type                               = 7 [default = PRE_PAY]; // 付款方式
+    optional PriceInfo base_sale_price                      = 8; // 促销基础价
+};
+
+message ListHotel {
+    required int32 base_hotel_id                            = 1; // elong hotel id
+    optional int64 crawl_time                               = 2; // 最低价的抓取时间
+    optional BookingStatus booking_status                   = 4; // 酒店预订状态
+    repeated PromotionInfo promotion_info                   = 5; // 促销活动
+    repeated ListOta list_ota_list                          = 6; // 供应商列表
+    optional bool mobile_only                               = 7 [default = false]; // 是否包含手机专享ota
+    repeated Tag tag                                        = 12; //  酒店粒度tags
+};

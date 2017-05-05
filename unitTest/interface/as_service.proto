@@ -1,0 +1,189 @@
+// Copyright 2013 ELong Inc. All rights Reserved.
+// 高级检索接口文件
+
+import "price_types.proto";
+import "as_types.proto";
+
+package el_v3;
+option cc_generic_services = true;
+
+// 检索类型
+enum SearchType {
+    LIST_TYPE                                               = 1; // 列表页检索
+    DETAIL_TYPE                                             = 2; // 详情页检索
+    BOOKING_TYPE                                            = 3; // 订单页检索
+    HOT_HOTEL_TYPE                                          = 4; // 热门城市
+    HOTEL_FILTER_TYPE                                       = 5; // 统计信息
+    NEARBY_TYPE                                             = 6; // 周边地标
+    COUNTRY_CITY_TYPE                                       = 7; // 国家页
+    HOTEL_LIST_TYPE                                         = 8; // 酒店批量接口
+    COUNTRY_BUSINESS_TYPE                                   = 9;//国家商圈页
+    TOPIC_CITY_TYPE                                         = 10;//主题城市页
+    SPECIAL_TOPIC_TYPE                                      = 11;//促销专题页面
+}
+
+// 请求
+message AsRequest {
+    optional string search_id                               = 1; // 全局的log id
+    optional int32 version_id                               = 2; // 版本号
+    optional price.UserInfo user_info                       = 3; // userinfo
+    required SearchType search_type                         = 4; // 检索类型 
+    optional string source_id                               = 5;//来源ID 详情页如果从列表页跳转而来则为(search_id)_(page_no)_(sort_pos),列表页搜索ID，页码，排序中位置等组成。如果是订单页，则为（search_id)_(refresh_time)_(pos),详情页的search_id,增量刷新的第几次刷新的结果，页面中的位置信息
+
+    optional ListRequest list_req                           = 11; // 列表页请求,促销专题页面,批量酒店接口请求
+    optional DetailRequest detail_req                       = 12; // 详情页请求
+    optional BookingRequest booking_req                     = 13; // 订单页请求
+    optional HotHotelRequest hot_req                        = 14; // 热门城市请求
+    optional HotelFilterRequest filter_req                  = 15; // 统计信息请求
+    optional NearbyRequest nearby_req                       = 16; // 周边地标请
+    optional CountryCityRequest country_req                 = 17; // 国家页请求
+    optional CountryBusinessRequest business_req            = 18; //国家商圈页面
+    optional TopicCityRequest   topic_req                   = 19; //主题城市页面
+   
+}
+
+// 响应
+message AsResponse {
+    optional string search_id                               = 1; // 全局的log id
+    optional ServiceStatus status                           = 2; // 执行状态
+    optional price.RequestType request_type                       = 3; // 用户身份识别
+
+    optional ListResponse list_resp                         = 11; // 列表页，专题页面，酒店批量接口返回
+    optional DetailResponse detail_resp                     = 12; // 详情页
+    optional BookingResponse booking_resp                   = 13; // 订单页
+    optional HotHotelResponse hot_resp                      = 14; // 热门城市
+    optional HotelFilterResponse filter_resp                = 15; // 统计信息
+    optional NearbyResponse nearby_resp                     = 16; // 周边地标
+    optional CountryCityResponse country_resp               = 17; // 国家页
+    optional CountryBusinessResponse business_resp         = 18; //国家商圈页面
+    optional TopicCityResponse     topic_resp               = 19; //主题城市页面 
+}
+
+// 列表页请求
+message ListRequest {
+    required QueryInfo   query_info                         = 1; // 检索条件 
+    optional KeyWord     key_word                           = 2; // 关键词
+    optional PageInfo    page_info                          = 3; // 分页信息
+    optional FilterInfo  list_filter                        = 4; // 过滤条件
+    optional RankType    rank_type                          = 5; // 排序规则
+    optional bool        price_only                         = 6[default = true]; // 是否只要酒店价格
+}
+
+
+// 列表页响应
+message ListResponse {
+    optional RegionInfo region_info                         = 1; // 目的地信息
+    optional LocationInfo location_info                     = 2; // 识别出的位置信息 poi/neighbor
+    optional HotelFilter hotel_filter                       = 3; // 统计信息
+    optional int32 page_num                                 = 4; // 总页数
+    optional int32 hotel_num                                = 5; // 总酒店数
+    optional RankType rank_type                             = 6; // 排序规则
+    repeated ListHotelDigest list_digest                    = 7; // 酒店信息列表
+    optional SpecialTopicDigest special_digest              = 8;//促销专题信息
+    repeated RegionInfo mul_region_info                     = 9;//多region信息
+    repeated LocationInfo mul_location_info                 = 10; // 识别出的多个位置信息 poi/neighbor
+}
+
+// 详情页请求
+message DetailRequest {
+    required QueryInfo  query_info                          = 1; // 检索条件
+}
+
+// 详情页响应
+message DetailResponse {
+    optional RegionInfo region_info                         = 1; // 目的地信息
+    optional DetailHotelDigest detail_digest                = 2; // 酒店静态信息
+    optional price.DetailHotel detail_hotel                 = 3; // 酒店产品信息，来自于price
+    optional RegionInfo top_region_info                     = 4; // 目的地信息
+}
+
+// 订单页请求
+message BookingRequest {
+    required QueryInfo query_info                           = 1; // 检索条件  
+    optional price.DetailOta detail_ota                     = 2; // 待校验的产品，可扩展
+}
+
+// 订单页响应
+message BookingResponse {
+    optional RegionInfo region_info                         = 1; // 目的地信息
+    optional DetailHotelDigest detail_digest                = 2; // 酒店静态信息
+    optional price.DetailHotel detail_hotel                 = 3; // 酒店产品信息, 来自于price
+}
+
+// 热门城市请求
+message HotHotelRequest {
+    repeated int32 region_id                                = 1; // 目的地id列表
+}
+
+// 热门城市响应
+message HotHotelResponse {
+    repeated HotHotelInfo hot_hotel                         = 1; // 热门城市信息列表
+}
+
+// 国家页请求
+message CountryCityRequest {
+    optional int32 region_id                                = 1; // 国家id
+}
+
+//国家商圈页面请求
+message CountryBusinessRequest{
+    optional int32 country_id                                =1; //国家id
+    optional PageInfo    page_info                          = 2; // 分页信息   
+
+}
+//主题页面请求
+message TopicCityRequest {
+    optional int32 topic_id                                 =1;//主题id
+    optional PageInfo    page_info                          = 2; // 分页信息
+}
+
+//国家商圈页
+message CountryBusinessResponse {
+    optional string country_name_cn                            = 1; //国家中文名
+    optional string country_desc                               = 2;//国家描述
+    optional int32 city_num                                    = 3;//总城市数
+    optional int32 page_num                                    = 4;//总页数
+    repeated CityTopic city_topic                              = 5; //国家主题
+    repeated City  city                                        = 6;//国家城市
+
+}
+//主题页面
+message TopicCityResponse {
+    optional CityTopic city_topic                               = 1;//主题信息
+    optional int32 city_num                                     = 2;//总城市数
+    optional int32 page_num                                     = 3;//总页数
+    repeated City city                                          = 4;//城市信息
+}
+
+// 国家页响应
+message CountryCityResponse {
+    repeated CountryCityInfo city_info                      = 1; // 城市列表信息
+    optional CountryCityInfo country_info                   = 2; // 国家信息
+}
+
+// 周边地标请求
+message NearbyRequest {
+    optional int32 hotel_id                                 = 1; // 酒店id
+    optional int32 region_id                                = 2; // 酒店所在城市
+}
+
+// 周边地标响应
+message NearbyResponse {
+    repeated NearbyPoi poi                                  = 1; // poi信息
+    optional string    hotel_name_cn                        = 2; // 酒店中文名
+    optional string    hotel_name_en                        = 3; // 酒店英文名
+}
+
+// 统计信息请求
+message HotelFilterRequest {
+    optional int32    region_id                             = 1; // 目的地id
+}
+
+// 统计信息响应
+message HotelFilterResponse {
+    optional HotelFilter hotel_filter                       = 1; // 酒店统计信息
+}
+
+service AsService {
+    rpc search (AsRequest) returns (AsResponse);
+}

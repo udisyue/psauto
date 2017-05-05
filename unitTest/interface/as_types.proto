@@ -1,0 +1,499 @@
+// Copyright 2013 Elong Inc. All rights Reserved.
+// 通用类型定义
+
+import "price_types.proto";
+package el_v3;
+
+// -- 枚举类型定义 begin --
+
+// 关键词类型
+enum KeyWordType {
+    POI_TYPE                                                = 0; // 地标
+    NEIGHBOR_TYPE                                           = 1; // 区域
+    HOTEL_TYPE                                              = 2; // 酒店
+    CITY_TYPE                                               = 3; // 城市
+    MULTI_CITY_TYPE                                         = 4; // 超城市
+    REGION_TYPE                                             = 5; // 目的地(城市+超城市)
+    COUNTRY_TYPE                                            = 6; // 国家
+    UNKNOW_TYPE                                             = 20; // 未知
+}
+
+// POI类型
+enum POIType {
+    AIR                                                     = 0; // 飞机
+    METRO                                                   = 1; // 地铁
+    BUS                                                     = 2; // 公交
+    SIGHT                                                   = 3; // 景点
+    HOT                                                     = 4;//热门
+}
+
+// 酒店星级
+enum HotelStarType {
+    NOLIMITED                                               = 0; //不限
+    STAR1                                                   = 1;
+    STAR2                                                   = 2;
+    STAR3                                                   = 3;
+    STAR4                                                   = 4;
+    STAR5                                                   = 5;
+}
+
+
+// 酒店星级
+enum HotelScoreType {
+    Score0                                                   = 0; //不限
+    Score1                                                   = 1;
+    Score2                                                   = 2;
+    Score3                                                   = 3;
+    Score4                                                   = 4;
+    Score5                                                   = 5;
+}
+
+enum LangType {
+    LANG_CN                                                 = 0; // 中文
+    LANG_EN                                                 = 1; // 英文
+}
+
+// 预订状态
+enum BookingStatus {
+    BOOKING_FAIL                                            = 0; // 不可订
+    BOOKING_SUCC                                            = 1; // 可预订
+}
+
+// 排序类型
+enum RankType {
+    DEFAULT                                                 = 0; // 默认排序
+    PRICEASC                                                = 1; // 价格,从低到高
+    PRICEDESC                                               = 2; // 价格,从高到低
+    STARASC                                                 = 3; // 星级,从低到高
+    STARDESC                                                = 4; // 星级,从高到低
+    SCOREDESC                                               = 5; // 评分,从高到低
+    DISTANCEASC                                             = 6; // 距离,从近到远
+    UNKONW                                                  = 7; // 未知，由检索端决定
+}
+
+// List请求子类型，用于定义list需要的返回的字段
+// 目前支持如下请求类型的组合:
+// 十进制 二进制  枚举值
+// fe请求as的参数:
+// 3  0011 : ORIGIN_PRICE | ELONG_PRICE - 列表页批量接口
+// 15 1111 : ORIGIN_PRICE | ELONG_PRICE | PROMOTION | DIGEST - 列表页批量接口
+// as请求ps可能的参数:
+// 3  0011 : ORIGIN_PRICE | ELONG_PRICE  - 列表页批量接口
+// 15 1111 : ORIGIN_PRICE | ELONG_PRICE | PROMOTION | DIGEST - 列表页批量接口
+// 1  0001 : ORIGIN_PRICE  - 列表页检索接口
+// 7  0111 : ORIGIN_PRICE | ELONG_PRICE | PROMOTION - 列表页检索接口
+// 获取原始价时，ORIGIN_PRICE和BASE_ORIGIN_PRICE互斥
+enum ListQueryType {
+    ORIGIN_PRICE                                            = 0; // 原始价
+    ELONG_PRICE                                             = 1; // 卖价
+    PROMOTION                                               = 2; // 促销
+    DIGEST                                                  = 3; // 摘要
+    BASE_ORIGIN_PRICE                                       = 4; // 原始月基础价
+}
+
+// -- 枚举类型定义 end --
+
+
+// -- 接口数据类型定义 begin --
+
+// 执行状态
+// 202260	as详情接口ps售完
+// 202270	as详情接口ps内部异常
+// 203000	as订单接口成功
+// 203110	as订单接口内部参数异常
+// 203120	as订单接口内部配置异常
+// 203130	as订单接口内部计算异常
+// 203210	as订单接口外部参数异常
+// 203230	as订单接口ps连接异常
+// 203240	as订单接口ps超时
+// 203250	as订单接口外部摘要
+// 203260	as订单接口ps售完
+// 203270	as订单接口ps内部异常
+// 204000	as热门酒店成功
+// 204100	as热门酒店失败
+// 205000	as统计接口成功
+// 205100	as统计接口失败
+// 206000	as地标成功
+// 206100	as地标失败
+// 207000	as国家城市页成功
+// 207100	as国家城市页失败
+// 208000	as批量接口成功
+// 208100	as批量接口失败
+// 209000	as国家商圈页成功
+// 209100	as国家商圈页失败
+// 2010000	as主题成功
+// 2010100	as主题失败
+ message ServiceStatus {
+    optional int32 code                                     = 1; // 状态代码
+    optional int32 sub_code                                 = 2; // 状态子码
+    optional string msg                                     = 3; // 状态描述
+}
+
+// 人数组合
+message RoomPerson {
+    optional int32 adult_num                                = 1; // 成人数
+    repeated int32 child_age_list                           = 2; // 儿童年龄List，长度为儿童个数
+}
+
+// 检索条件
+message QueryInfo {
+    optional int32          region_id                       = 1; // 目的地id
+    repeated int32          hotel_id                        = 2; // 酒店id列表(兼容批量接口)
+    optional int64          check_in_date                   = 3; // 入住日期
+    optional int64          check_out_date                  = 4; // 离店日期
+    repeated RoomPerson     room_person                     = 5; // 人数组合
+    optional int64          filter_ota                      = 6; // 供应商屏蔽mask
+    optional bool           static_only                     = 7[default = false]; // 是否只要静态信息
+    optional int64          ota_priority                    = 8; // 【ota编号位图，ds:5】请求时ota的优先级,1表示高优先级，0表示低优先级，存在高忧ota的情况下，将不再等待低忧酒店的返回,不传默认全部为0
+    optional int64          timeout                         = 9; // 【单位ms】请求产品时，期望的最大等待时间，超过此时间的ota的产品数据本次请求将被丢弃，此值需小于等于ps默认超时时间
+    optional int64          cache_time                      = 10; //【单位s】产品缓存时间，详情页默认5*60s，订单页默认0s即不使用缓存数据
+    // optional bool           origin_only                  = 11 [default = false]; // list页查询条件，true表示仅返回基础价，不返回艺龙价与促销信息，默认全部返回
+    // optional bool           price_only                   = 12 [default = false]; // list页查询条件，true表示仅返回基础价及艺龙价，不返回促销信息，默认全部返回
+    optional int32          list_query_flag                 = 11; // ListQueryType 的bitmap标示，用于定义List请求的期望输出内容,合法的值请参见ListQueryType的用法
+    optional bool           update_list_only                = 12 [default = false]; // 只更新最低价
+    optional int64          cashpay_booking_channel_mask    = 13; // 现付产品按渠道号过滤,bitmap表示,1表示屏蔽
+    optional int64          cashpay_ota_id_mask             = 14; // 现付产品按供应商过滤,bitmap表示,1表示屏蔽
+    optional int32          special_id                      = 15;//专题ID
+    repeated int32          mul_region_id                   = 16;//多region_id信息
+}
+
+
+// 关键词
+message KeyWord {
+    optional KeyWordType  key_type                          = 1 [default = UNKNOW_TYPE]; // 关键词类型 poi/neighbor/hotel
+    optional int32        key_id                            = 2; // 关键词id
+    optional string       key_str                           = 3; // 关键词
+    optional LatLngInfo   lat_lng_info                      = 4; // 经纬度信息(用于周边搜索)
+    repeated int32        mul_key_id                        = 5;//仅支持多个neighbor，其他暂不支持
+}
+
+// 过滤条件 
+message FilterInfo {
+    repeated PriceRange     hotel_price_range               = 1; // 价格区间
+    repeated HotelStarType  hotel_star                      = 2; // 星级
+    repeated int32          hotel_brand                     = 3; // 品牌
+    repeated int32          hotel_type                      = 4; // 类型
+    repeated int32          hotel_facility                  = 5; // 酒店设施
+    optional int32          hotel_distance                  = 6; // 距离
+    repeated price.FilterTag      tag                             = 7; //tag项筛选，点评tag
+    repeated HotelTopic hotel_topic_target                  = 8; //出行目的
+    repeated HotelTopic hotel_topic_human                   = 9;//出行人群
+    repeated HotelScoreType hotel_score                     = 10;//点评分数
+
+}
+
+// 分页信息
+message PageInfo {
+    optional int32 page_no                                  = 1[default = 0]; // 页码
+    optional int32 page_size                                = 2; // 每页返回酒店数
+    optional int32 hotel_num                                = 3; // 期望返回的酒店数
+}
+
+// 列表页酒店摘要
+message ListHotelDigest {
+    optional int32            base_hotel_id                 = 1; // 酒店ID
+    optional string           hotel_name_cn                 = 2; // 中文名
+    optional string           hotel_name_en                 = 3; // 英文名
+    optional string           alias_name_cn                 = 4; // 中文别名
+    optional string           alias_name_en                 = 5; // 英文别名
+    optional GeoInfo          hotel_geo_info                = 6; // 酒店经纬度
+    optional string           hotel_address_cn              = 7; // 酒店中文地址
+    optional string           hotel_address_en              = 8; // 酒店英文地址
+    optional string           district                      = 9; // 所在区
+    optional string           district_seo                  = 10; // 所在区详情
+    optional string           distance                      = 11; // 距地标距离
+    optional string           hotel_star                    = 12; // 酒店星级
+    optional CommentInfo      hotel_comment_info            = 13; // 点评信息
+    repeated HotelFacility    facility_list                 = 14; // 设施列表
+    optional string           hotel_image                   = 15; // 酒店缩略图
+    optional price.ListHotel  list_hotel                    = 16; // list产品信息
+    repeated HotelTopic hotel_topic_target                  = 17; //出行目的
+    repeated HotelTopic hotel_topic_human                   = 18;//出行人群
+    optional string            to_source_id               = 19;//列表页位置id,目的填充详情页来源ID，组成(search_id)_(page_no)_(sort_pos),本次搜索ID，页码，排序中位置等组成
+    optional int32              region_id                   = 20 ;//region
+    optional string             region_name_cn              = 21;//region中文名称
+    repeated NearbyPoi poi                                  = 22; // poi信息
+}
+
+// 详情页酒店摘要
+message DetailHotelDigest {
+    optional int32 base_hotel_id                            = 1; // 酒店ID
+    optional string hotel_name_cn                           = 2; // 酒店中文名称
+    optional string hotel_name_en                           = 3; // 酒店英文名称
+    optional string hotel_openning_date                     = 4; // 开业时间
+    optional string hotel_last_decorate_date                = 5; // 最后装修时间
+    optional string hotel_star                              = 6; // 酒店星级 (支持类似 3.5星）
+    optional GeoInfo hotel_geo_info                         = 7; // 酒店经纬度
+    optional CommentInfo hotel_comment_info                 = 8; // 点评信息
+    optional string hotel_summary_cn                        = 9; // 酒店中文介绍
+    optional string hotel_summary_en                        = 10; // 酒店英文介绍
+    optional string hotel_address_cn                        = 11; // 酒店中文地址
+    optional string hotel_address_en                        = 12; // 酒店英文地址
+    repeated string accept_credit_card                      = 13; // 可接受信用卡
+    repeated HotelFacility facility_list                    = 14; // 设施服务
+    optional string hotel_policy                            = 15; // 政策声明
+    optional string hotel_fee                               = 16; // 费用声明
+    optional string information                             = 17; // Information
+    repeated string hotel_image_list                        = 18; // 酒店图片列表
+    optional string hotel_telephone                         = 19; // 酒店电话
+    optional string check_in                                = 20; // 酒店入住时间
+    optional string check_out                               = 21; // 酒店离店时间
+    repeated string keywords                                = 22; // 关键词，全部别名信息
+    optional int32  hotel_brand                             = 23; // 酒店品牌id
+    optional string attachment                              = 24; // 酒店扩展字段 json 
+    repeated string hotel_recomment                         = 25; //酒店推荐
+    repeated HotelFeature hotel_feature                     = 26; //酒店卖点
+    repeated NearbyPoi poi                                  = 27; // poi信息
+}
+
+message HotelTopic {
+    optional string topic_id                                = 1;//主题ID
+    optional string topic_name                              = 2;//主题名称
+    optional int32  recommend                               = 3;//评价
+    optional int32 comment_count                            = 4;//点评数
+}
+
+// 目的地信息
+message RegionInfo {
+    optional int32 region_id                                = 1[default = -1]; // 城市id
+    optional string region_name_cn                          = 2; // 城市中文名
+    optional string region_name_en                          = 3; // 城市英文名
+    optional GeoInfo region_center                          = 4; // 城市中心点
+    repeated GeoInfo region_polygon                         = 5; // 城市多边形信息
+    optional int32 country_id                               = 6; // 国家id
+    optional string country_code                            = 7; // 国家编码
+    optional string country_name_cn                         = 8; // 国家中文名
+    optional string country_name_en                         = 9; // 国家英文名
+    repeated price.PromotionInfo promotion_info             = 10; // 目的地促销活动
+    repeated price.Tag tag                                  = 11; // 城市粒度的tags
+    optional string region_desc                             = 12; //城市描述信息
+    repeated CityTopic city_topic                           = 13; //城市主题
+}
+
+
+//促销专题摘要信息
+message SpecialTopicDigest {
+    optional    int32 special_id                            = 1;//专题ID
+    optional    string special_name                         = 2;//专题名称
+    optional    bytes  special_desc                         = 3;//专题描述
+}
+
+// 位置(poi/neighbor)
+message LocationInfo {
+    optional KeyWordType type                               = 1; // 类型 poi/neighbor
+    optional int32       id                                 = 2; // id
+    optional string      name_cn                            = 3; // 中文名
+    optional string      name_en                            = 4; // 英文名
+    optional string      distance                           = 5; // 距酒店的距离
+    repeated GeoInfo     geo_info                           = 6; // 经纬度信息(poi:中心点，neighbor:多边形)
+    optional LangType    lang_type                           = 7; // 用户输入的语言类型
+}
+
+// 点评信息
+message CommentInfo {
+    optional string comment_score                           = 1; // 分数
+    optional int32 comment_count                            = 2; // 次数
+    optional int32 comment_site_num                         = 3; // 来自网站个数
+    optional double rate_location                           = 4; // 道道的6项得分
+    optional double rate_sleep                              = 5;
+    optional double rate_room                               = 6;
+    optional double rate_service                            = 7;
+    optional double rate_value                              = 8;
+    optional double rate_cleanliness                        = 9;
+}
+
+// 一次检索中每个筛选条件对应的酒店个数统计
+message HotelFilter {
+    repeated PriceRangeStat price_range_stat                = 1; // 价格区间对应酒店个数
+    repeated HotelStarStat hotel_star_stat                  = 2; // 星级对应酒店个数
+    repeated HotelBrandStat hotel_brand_stat                = 3; // 品牌对应酒店个数
+    repeated HotelTypeStat hotel_type_stat                  = 4; // 酒店类型对应酒店个数
+    repeated HotelFacilityStat hotel_facility_stat          = 5; // 酒店设施对应酒店个数
+    repeated HotelTagStat   hotel_tag_stat                  = 6; //酒店tag对应酒店个数
+    repeated HotelTopicStat hotel_topic_target_stat         = 7;//酒店出行目的对应酒店个数
+    repeated HotelTopicStat hotel_topic_human_stat          = 8;//酒店出行人群对应酒店个数
+    repeated HotelScoreStat hotel_score_stat                = 9;//酒店点评分数对应个数
+}
+//酒店点评统计
+message HotelTagStat {
+    optional price.TagType tag_type         = 1; //tag类型
+    optional int32  tag_id                  = 2;//tagID 
+    optional string tag_name                   = 3; // 标签name
+    optional int32  count                   = 4;//酒店个数
+}
+message HotelTopicStat {
+    optional string topic_id                                = 1;//主题ID
+    optional string topic_name                              = 2;//主题名称
+    optional int32 count                                    = 3;//酒店个数
+}
+
+// 热门酒店信息
+message HotHotelInfo {
+    optional int32 region_id                                = 1; // 目的地ID
+    optional int32 hotel_num                                = 2; // 目的地酒店数
+    repeated CityTopic city_topic  = 3;//城市主题
+    optional string city_desc = 4;//城市描述
+
+}
+
+// 周边地标信息
+message NearbyPoi {
+    optional POIType poi_type                               = 1; // 地标类型
+    repeated LocationInfo poi_data                          = 2; // 地标信息 
+}
+
+// 国家或城市信息
+message CountryCityInfo {
+    optional int32 region_id                                = 1; // 目的地id
+    optional KeyWordType region_type                        = 2; // 国家/城市/超城市 
+    optional string region_name_cn                          = 3; // 中文名 
+    optional string region_name_en                          = 4; // 英文名
+    optional string first_letter                            = 5; // 中文首字母
+    optional int32 region_weight                            = 6; // 权重
+    optional string region_image                            = 7; // 图片
+}
+
+// 酒店设施
+message HotelFacility {                                                              
+    optional int32  id                                      = 1; // 设施对应ID
+    optional string facility_name_cn                        = 2; // 设施中文名
+    optional string facility_name_en                        = 3; // 设施英文名
+}
+
+//酒店卖点
+message HotelFeature{
+optional string title   = 1; //卖点名称
+optional string describe    = 2;//卖点描述
+}
+// -- 接口数据类型定义 end --
+
+
+// -- 基础数据单元定义 begin --
+
+// 一个价格区间[单位:元]
+message PriceRange {
+    optional int32 lowest_price                             = 1; // 最低价格
+    optional int32 highest_price                            = 2; // 最高价格
+}
+
+// 经纬度检索参数
+message LatLngInfo {
+    optional GeoInfo geo_info                               = 1; // 经纬度
+    optional int32   geo_radius                             = 2; // 搜索半径[米]
+}
+
+// 经纬度信息
+message GeoInfo {
+    optional double geo_longitude                           = 1; // 经度
+    optional double geo_latitude                            = 2; // 纬度
+}
+
+// app导流信息
+message MobileInfo {
+    optional bool      mobile_only                          = 1[default = false]; // 手机专享
+    optional double    mobile_discount                      = 2; // app折扣
+}
+
+// 筛选：价格区间
+message PriceRangeStat {
+    optional PriceRange price_range                         = 1; // 价格范围 [单位:元]
+    optional int32 count                                    = 2; // 酒店个数
+}
+
+// 筛选：星级
+message HotelStarStat {
+    optional HotelStarType hotel_star                       = 1; // 酒店星级
+    optional int32 count                                    = 2; // 酒店个数
+}
+
+// 筛选：点评分数
+message HotelScoreStat {
+    optional HotelScoreType hotel_score                       = 1; // 酒店星级
+    optional int32 count                                    = 2; // 酒店个数
+}
+
+// 筛选：品牌
+message HotelBrandStat {
+    optional int32  hotel_brand                             = 1; // 酒店品牌ID
+    optional int32  count                                   = 2; // 酒店个数
+    optional string brand_name_cn                           = 3; // 品牌中文名
+    optional string brand_name_en                           = 4; // 品牌英文名
+    optional int32  sales                                   = 5;//品牌酒店销量
+}
+
+// 筛选：类型
+message HotelTypeStat {
+    optional int32 hotel_type                               = 1; // 酒店类型ID
+    optional int32 count                                    = 2; // 酒店个数
+    optional string type_name_cn                            = 3; // 类型中文名
+    optional string type_name_en                            = 4; // 类型英文名
+}
+
+// 筛选：设施
+message HotelFacilityStat {
+    optional int32 hotel_facility                           = 1; // 酒店设施ID
+    optional int32 count                                    = 2; // 酒店个数
+    optional string facility_name_cn                        = 3; // 设置中文名
+    optional string facility_name_en                        = 4; // 设施英文名
+}
+
+// 目的地、地标信息(请求)
+message CenterLocationRequest {
+    required int32    region_id                             = 1; // 目的地id
+    repeated KeyWord  location_items                        = 2; // 识别出的item 
+}
+
+// 目的地、地标信息(响应)
+message CenterLocationResponse {
+    optional RegionCenter  region_center                    = 1;
+    repeated LocationInfo  location_info                    = 2;
+};
+
+// 目的地中心点
+message RegionCenter {                                                               
+    optional string  region_name_cn                         = 1; //目的地中文名
+    optional string  region_name_en                         = 2; //目的地英文名
+    optional GeoInfo region_geoinfo                         = 3; //目的地经纬度
+    repeated GeoInfo region_polygon                         = 4; //目的地多边形
+};
+//主题
+message CityTopic {
+    optional int32  topic_id               = 1;
+    optional string topic_name_cn          = 2;//城市主题名称
+}
+//商圈信息
+message Neighbor{
+    optional int32 neighbor_id  =1;
+    optional string neighbor_name_cn    =2;//商圈名称
+    optional double booking_rate   = 3;//商圈入住率
+    optional int32 hotel_num    =4;//商圈酒店数量
+    optional string neighbor_desc   =5;//商圈介绍
+    optional GeoInfo region_center                          = 6; // 商圈中心点
+    repeated GeoInfo region_polygon                         = 7; // 商圈多边形信息
+
+}
+//旅游景点信息
+message Tourist{
+optional int32 tourist_id   =1;
+optional string tourist_name_cn = 2;
+}
+
+message City{
+    optional int32 region_id    =1;
+    optional string region_name_cn = 2;
+    optional string region_country_name_cn = 3;
+    repeated CityTopic city_topic   =4;//城市主题
+    repeated Neighbor neighbor  =5;//商圈
+    optional GeoInfo region_center                          = 6; // 城市中心点
+    repeated GeoInfo region_polygon                         = 7; // 城市多边形信息
+    repeated Tourist tourist = 8;//旅游景点信息
+    optional int32 hotel_num = 9; //城市酒店数量
+    optional string city_image =10; //城市图片信息
+    optional string city_desc = 11;//城市描述信息
+    optional string region_name_en = 12;//城市英文名称
+    optional string region_country_name_en = 13; //国家英文名称
+    optional string first_py_char          = 14;//城市名称首字母
+}
+
+
+// -- 基础数据单元定义 end --

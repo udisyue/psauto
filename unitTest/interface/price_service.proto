@@ -1,0 +1,110 @@
+//real time price search service interface
+
+import "price_types.proto";
+import "as_types.proto";
+
+//  Explanation abbreviations
+//  As     Advanced Search
+//  Price  Price Search
+//  Oa     Ota Adaptor
+//  Pc     PreCrawl
+
+package  price;
+
+option cc_generic_services = true;  //support c++ language
+option py_generic_services = true;  //support python language
+
+enum ServiceType {
+    LIST_TYPE                                               = 1;  //get the lowest price
+    DETAIL_TYPE                                             = 2;  //detail page search
+    BOOKING_TYPE                                            = 3;  //booking page search
+    PRICE_UPDATE_TYPE                                       = 4;  //update price info by PreCrawl
+};
+
+message PsRequest {
+    optional string search_id                               = 1;
+    optional int32 version_id                               = 2; // 版本号
+    optional UserInfo user_info                             = 3;
+    required ServiceType service_type                       = 4;
+
+    optional ListRequest list_request                       = 11;
+    optional DetailRequest detail_request                   = 12;
+    optional BookingRequest booking_request                 = 13;
+    optional PriceUpdateRequest price_update_request        = 14;
+};
+
+message PsResponse {
+    optional string search_id                               = 1;
+    optional el_v3.ServiceStatus service_status             = 2;
+
+    optional ListResponse list_response                     = 11;
+    optional DetailResponse detail_response                 = 12;
+    optional BookingResponse booking_response               = 13;
+    optional PriceUpdateResponse price_update_response      = 14;
+};
+
+message ListRequest {
+    required el_v3.QueryInfo query_info                     = 1;
+};
+
+message ListResponse {
+    repeated ListHotel list_hotel                           = 1;
+    repeated PromotionInfo region_promotion_info            = 2; // 城市粒度的促销  
+};
+
+message DetailRequest {
+    required el_v3.QueryInfo query_info                     = 1;
+};
+
+message DetailResponse {
+    required DetailHotel detail_hotel                       = 1;
+    repeated PromotionInfo region_promotion_info            = 2; // 城市粒度的促销  
+};
+
+message BookingRequest {
+    required el_v3.QueryInfo query_info                        = 1;
+    optional DetailOta detail_ota                           = 2;
+};
+
+message BookingResponse {
+    required DetailHotel detail_hotel                       = 1;
+    repeated PromotionInfo region_promotion_info            = 2; // 城市粒度的促销  
+};
+
+message PriceUpdateRequest {
+    optional el_v3.QueryInfo query_info                     = 1;
+    repeated DetailOta detail_ota                           = 2;
+};
+
+message PriceUpdateResponse {
+};
+
+
+service PsService {
+    rpc Search(PsRequest) returns (PsResponse);
+};
+
+message OaRequest {
+    optional string search_id                               = 1; 
+    optional int32 version_id                               = 2;  // 版本号
+    optional UserInfo user_info                             = 3;  
+    required el_v3.QueryInfo query_info                     = 4; 
+    required int32 request_type                             = 5;  // 0 静态数据接口, 1 最低价接口, 2 Elong DETAIL 3, Elong Booking
+    required int32 ota_id                                   = 6;  // 供应商ID
+    repeated string ota_hotel_id_list                       = 7;  // OTA hotel id
+    
+    optional bool is_exist                                  = 20; // 返回该搜索条件下elong_pid匹配的产品
+    optional DetailOta detail_ota                           = 21; // 订单页产品可定检查，每次仅支持同OTA多产品下单 
+};
+
+message OaResponse {
+    optional string search_id                               = 1;
+    optional el_v3.ServiceStatus service_status             = 2;
+    repeated DetailOta detail_ota_list                      = 3;
+    optional el_v3.QueryInfo query_info                     = 4;
+    optional UserInfo user_info                             = 5;
+};
+
+service OaService {
+    rpc Search(OaRequest) returns (OaResponse);
+};

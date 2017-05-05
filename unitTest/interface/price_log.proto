@@ -1,0 +1,145 @@
+// Copyright 2013 Elong Inc. All rights Reserved.
+
+import "as_types.proto";
+import "price_types.proto";
+import "price_service.proto";
+package el_ps_log;
+
+// --- 基本数据类型定义 begin ---
+
+// 产品来源
+message ProductFrom {
+    repeated int32 fc                                       = 1; // 来自缓存
+    repeated int32 fo                                       = 2; // 来自Oa 
+    repeated int32 m                                        = 3; // 丢弃
+    repeated int32 total                                    = 4; // 全量
+}
+
+// 详情页基本信息
+message DetailInfo {
+    optional int32 base_hotel_id                            = 1;
+    repeated Ota   ota                                      = 2;
+}
+
+// 详情页供应商基本信息
+message Ota {
+    required int32 ota_id                                   = 1;
+    optional int64 base_price                               = 2;
+    optional int64 base_origin_price                        = 3;
+    optional int64 crawl_time                               = 4;
+    repeated Room  room_list                                = 5;
+}
+
+// 房型基本信息
+message Room {
+    required string room_id                                 = 1;  
+    optional string room_name_cn                            = 2;
+    optional string room_name_en                            = 3;
+    optional int64 base_price                               = 4;
+    repeated int64 daily_price                              = 5; // 价格日历
+    optional int64 mroom_id                                 = 6; 
+}
+
+// 列表页供应商基本信息
+message ListOta {
+    required int32 ota_id                                   = 1;
+    optional bool  mobile_only                              = 2;
+    optional bool  cash_pay                                 = 3;
+    optional int32 room_pr                                  = 4;
+    optional int32 pr                                       = 5;
+    optional int32 ts                                       = 6;
+}
+
+// 列表页价格
+message ListPrice {
+    repeated ListOta list_ota                               = 1;
+}
+
+// --- 基本数据类型定义 end ---
+
+
+
+// --- 接口数据类型定义 begin ---
+
+message PsLogRequest {
+    required price.ServiceType  type                         = 1;
+    optional ListRequest    list_req                         = 2;
+    optional DetailRequest  detail_req                       = 3;
+    optional BookingRequest booking_req                      = 4;
+}
+
+message PsLogResponse {
+    required price.ServiceType  type                         = 1;
+    optional ListResponse    list_resp                       = 2;
+    optional DetailResponse  detail_resp                     = 3;
+    optional BookingResponse booking_resp                    = 4;
+}
+
+// list-req
+message ListRequest {
+    optional price.UserInfo user_info                       = 1;
+    required el_v3.QueryInfo query_info                     = 2;
+}
+
+// list-resp
+message ListResponse {
+}
+
+// detail-req
+message DetailRequest {
+    optional price.UserInfo user_info                       = 1;
+    required el_v3.QueryInfo query_info                     = 2;
+}
+
+
+// detail-resp
+message DetailResponse {
+    optional ProductFrom product_from                       = 1; // 产品来源
+    optional DetailInfo  detail_info                        = 2; // 房型信息
+    optional ListPrice   list_pr                            = 3; // 列表页缓存价格   
+}
+
+// booking-req
+message BookingRequest {
+    optional price.UserInfo user_info                       = 1;
+    required el_v3.QueryInfo query_info                     = 2;
+    optional int32 ota_id                                   = 3;
+    optional int64 elong_pid                                = 4;
+}
+
+// booking-resp
+message BookingResponse {
+}
+
+// --- 接口数据类型定义 begin ---
+
+
+
+message PsOutInLog {
+    // base
+    required string productLine                             = 1;  // 业务线
+    required string projectName                             = 2;  // 工程名
+    required string className                               = 3;  // 类名
+    required string methodName                              = 4;  // 方法名
+    required int64  logTime                                 = 5;  // 日志时间
+    required string logType                                 = 6;  // 日志类型
+    required string hostName                                = 7;  // 机器名
+    optional string idc                                     = 8;  // 机房（非必填）
+    required string serverIp                                = 9;  // 机器ip
+    optional string idMap                                   = 10; // 扩展字段（非必填）
+    optional string traceId                                 = 11; // 请求跟踪号（非必填）
+    optional string uid                                     = 12; // 会员卡号（非必填）
+    optional string deviceId                                = 13; // 设备号（非必填）
+    // checklist
+    required string useTime                                 = 14; // 操作耗时
+    required bool isError                                   = 15; // 是否系统异常
+    required string businessCode                            = 16; // 业务响应编码
+    required string businessMessage                         = 17; // 编码描述
+    required bool isCheckList                               = 18; // 是否checkList
+    // outin
+    optional string requestHeader                           = 19; // 请求头信息（非必填）
+    optional string requestParams                           = 20; // 请求参数（非必填）
+    optional string responseInfo                            = 21; // 响应信息（非必填）
+    optional PsLogRequest request                           = 22; // inner请求（非必填）
+    optional PsLogResponse response                         = 23; // inner内应（非必填）
+}
