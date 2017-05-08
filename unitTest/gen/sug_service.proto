@@ -1,0 +1,32 @@
+//sug service interface
+
+import "sug_types.proto";
+
+package  el_sug;
+
+option cc_generic_services = true;  //support c++ language
+option py_generic_services = true;  //support python language
+
+enum ServiceType {
+    SUGGESTION                                              = 1;
+}
+
+message SugRequest {
+    optional ServiceType service_type                       = 1; 
+    optional int32 version_id                               = 2; // 版本号
+    optional UserInfo user_info                             = 3; //用户信息
+    optional string keywords                                = 4; //query
+    repeated SugType require_list                           = 5; //需要返回哪些类型，
+    optional uint32 require_cnt                             = 6; //需要返回的数量（总和）
+    optional uint32 region_id                               = 7; //region_id，全局sug可不填或0
+    optional uint32 region_filter                           = 8; //若传入region_id，此参数有效，(0:此region内结果优先，1:只取此region内结果,默认0)
+};
+
+message SugResponse {
+    optional string search_id                               = 1; 
+    optional SugStatus sug_status                           = 2;
+    repeated SugTermInfo sug_response                       = 11; 
+};
+service SugService {
+    rpc search(SugRequest) returns (SugResponse);
+};

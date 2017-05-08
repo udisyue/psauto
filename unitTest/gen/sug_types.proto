@@ -1,0 +1,55 @@
+//sug service interface
+
+package  el_sug;
+
+// 用户信息
+message UserInfo {
+    optional string user_ip                                 = 1; // 用户ip
+    optional string session_id                              = 2; // session_id
+    optional string cookie_id                               = 3; // cookie_id
+    optional string user_agent                              = 4; // user_agent
+    optional int32  booking_channel                         = 5; // 渠道 web/app/h5/nbapi
+    optional int32  order_from                              = 6; // 订单来源
+    optional int32  customer_level                          = 7; // 用户等级
+};
+
+message SugStatus {
+    optional int32 code                                     = 1;
+    optional string msg                                     = 2;
+}
+
+enum SugType {
+    UNKNOW                                                  = 0;
+    IHOTEL_CITY                                             = 1; //城市
+    IHOTEL_POI                                              = 2; //poi
+    IHOTEL_NEIGHBOR                                         = 3; //商圈
+    IHOTEL_COUNTRY                                          = 4; // 国家
+    IHOTEL_TOPIC                                            = 5; //主题
+    IHOTEL_HOTEL                                            = 6; //酒店
+}
+
+message RegionInfo {
+    optional uint32 dest_id                                 = 1; //id
+    optional string dest_name_cn                            = 2; //中文名
+    optional string dest_name_en                            = 3; //英文名
+    optional uint32 province_id                             = 4; //id
+    optional string province_name_cn                        = 5; //中文名
+    optional string province_name_en                        = 6; //英文名
+    optional uint32 country_id                              = 7; //id
+    optional string country_name_cn                         = 8; //中文名
+    optional string country_name_en                         = 9; //英文名
+}
+
+message SugTermInfo {
+    optional SugType type                                   = 1; //类型
+    optional uint32 id                                      = 2; //id
+    optional string name_cn                                 = 3; //中文名
+    optional string name_en                                 = 4; //英文名
+    optional string name_match                              = 5; //匹配名
+    repeated uint32 match_indexes                           = 6; //匹配名中匹配了那些字，如 输入“首尔酒店”，则 首尔乐天酒店匹配了：0,1,4,5
+    optional uint32 match_type                              = 7; //匹配名称号，1：中文，2：英文，3：其他
+    optional uint32 weight                                  = 8;//权重
+    optional RegionInfo region_info                         = 9; //附加 region信息，国家城市，省份
+    optional uint32 hotel_cnt                               = 10;//酒店数量，poi,neighbor,dest会有。
+    optional string attachment                              = 11;//附加信息，json格式，如商圈入住率，poi 经纬度，
+};

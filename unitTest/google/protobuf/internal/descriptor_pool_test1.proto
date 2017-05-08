@@ -1,6 +1,6 @@
 // Protocol Buffers - Google's data interchange format
 // Copyright 2008 Google Inc.  All rights reserved.
-// http://code.google.com/p/protobuf/
+// https://developers.google.com/protocol-buffers/
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -28,36 +28,69 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-// Author: qrczak@google.com (Marcin Kowalczyk)
+syntax = "proto2";
 
-#include <google/protobuf/pyext/python_protobuf.h>
+package google.protobuf.python.internal;
 
-namespace google {
-namespace protobuf {
-namespace python {
 
-static const Message* GetCProtoInsidePyProtoStub(PyObject* msg) {
-  return NULL;
+message DescriptorPoolTest1 {
+  extensions 1000 to max;
+
+  enum NestedEnum {
+    ALPHA = 1;
+    BETA = 2;
+  }
+
+  optional NestedEnum nested_enum = 1 [default = BETA];
+
+  message NestedMessage {
+    enum NestedEnum {
+      EPSILON = 5;
+      ZETA = 6;
+    }
+    optional NestedEnum nested_enum = 1 [default = ZETA];
+    optional string nested_field = 2 [default = "beta"];
+    optional DeepNestedMessage deep_nested_message = 3;
+
+    message DeepNestedMessage {
+      enum NestedEnum {
+        ETA = 7;
+        THETA = 8;
+      }
+      optional NestedEnum nested_enum = 1 [default = ETA];
+      optional string nested_field = 2 [default = "theta"];
+    }
+  }
+
+  optional NestedMessage nested_message = 2;
 }
-static Message* MutableCProtoInsidePyProtoStub(PyObject* msg) {
-  return NULL;
-}
 
-// This is initialized with a default, stub implementation.
-// If python-google.protobuf.cc is loaded, the function pointer is overridden
-// with a full implementation.
-const Message* (*GetCProtoInsidePyProtoPtr)(PyObject* msg) =
-    GetCProtoInsidePyProtoStub;
-Message* (*MutableCProtoInsidePyProtoPtr)(PyObject* msg) =
-    MutableCProtoInsidePyProtoStub;
+message DescriptorPoolTest2 {
+  enum NestedEnum {
+    GAMMA = 3;
+    DELTA = 4;
+  }
 
-const Message* GetCProtoInsidePyProto(PyObject* msg) {
-  return GetCProtoInsidePyProtoPtr(msg);
-}
-Message* MutableCProtoInsidePyProto(PyObject* msg) {
-  return MutableCProtoInsidePyProtoPtr(msg);
-}
+  optional NestedEnum nested_enum = 1 [default = GAMMA];
 
-}  // namespace python
-}  // namespace protobuf
-}  // namespace google
+  message NestedMessage {
+    enum NestedEnum {
+      IOTA = 9;
+      KAPPA = 10;
+    }
+    optional NestedEnum nested_enum = 1 [default = IOTA];
+    optional string nested_field = 2 [default = "delta"];
+    optional DeepNestedMessage deep_nested_message = 3;
+
+    message DeepNestedMessage {
+      enum NestedEnum {
+        LAMBDA = 11;
+        MU = 12;
+      }
+      optional NestedEnum nested_enum = 1 [default = MU];
+      optional string nested_field = 2 [default = "lambda"];
+    }
+  }
+
+  optional NestedMessage nested_message = 2;
+}
