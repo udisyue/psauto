@@ -25,7 +25,7 @@ for cnt in range(0,len(cflist)):
     checklist = read_conf.read_sug(path+'/'+cflist[cnt])
     for sugr_cnt in range(0,each_len):
         #checkpoint 1: keywords
-        chk1 = assert_func.ifcontent_in(checklist[4], response.sug_response[sugr_cnt].region_info.dest_name_cn.encode("utf8"))
+        chk1 = assert_func.ifcontent_in(checklist[4], response.sug_response[sugr_cnt].name_cn.encode("utf8"))
         if chk1 == 1 :
             chk1_rlt = 'check point 1 : keywords %s success'%checklist[2]
         else :
@@ -42,7 +42,6 @@ for cnt in range(0,len(cflist)):
                     break
                 else:
                     chk2_rlt_fail.append(checklist[3][requeire_cnt])
-
         chk2_rlt = 'check point 2 : sug type %r pass, sug type %r fail'%(chk2_rlt_pass, chk2_rlt_fail)
         print chk1_rlt
         print chk2_rlt

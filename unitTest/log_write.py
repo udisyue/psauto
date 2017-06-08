@@ -6,12 +6,13 @@ import struct
 import time
 log_path = "./log/"
 def mk_logfile(buff) :
-    print buff
     stamp = time.strftime("%Y%m%d%H%M%S",time.localtime())
     fname = log_path + stamp + '.rlt'
-    fo = open(fname,'wb')
-    fo.write(buff)
+    fo = open(fname,'w')
+    if buff :
+        fo.write(buff)
     fo.close()
+    return fname
 
 def log_list_format(jdata) :
     log_list = {}
@@ -30,3 +31,8 @@ def log_error(buff) :
     fo.write(buff)
     fo.close()
 
+def log_add(name, buff) :
+    fo = open(name, 'a')
+    if buff :
+        fo.write(buff+'\n')
+    fo.close()

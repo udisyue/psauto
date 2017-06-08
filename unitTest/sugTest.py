@@ -17,7 +17,7 @@ import read_conf
 import sug_service_pb2
 import sug_types_pb2
 HOST = '192.168.232.14'
-#HOST = '192.168.14.170'
+#HOST = '192.168.94.60'
 PORT = 5210
 '''
 pbcmd1 = "/home/yuzhong.chen/git/base/third-64/protobuf/bin/protoc --python_out=. --proto_path=../interface/ ../interface/sug_types.proto"
