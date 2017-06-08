@@ -152,71 +152,71 @@ def detail(in_param):
 
 citime = time.strftime('%Y-%m-%d',time.localtime(time.time()))
 cotime = time.strftime('%Y-%m-%d',time.localtime(time.time()+86400))
-
-
 cur_time = re.sub(r'-', "", citime)
-offset, rule = readDict.readAPRule(0,cur_time)
+offset = 0
+while(1):
+    offset, rule = readDict.readAPRule(offset, cur_time)
+    if offset != 0 :
+        # set param
+        in_param = {}
+        # in_param["ip"] = "192.168.14.170"
+        in_param["ip"] = "192.168.232.40"
+        in_param["port"] = "6300"
+        in_param["booking_channel"] = rule[1]
+        in_param["order_from"] = "50"
+        in_param["customer_level"] = "1"
+        # in_param["user_ip"] = "127.0.0.1"
+        in_param["hotel_id"] = rule[0]
+        in_param["filter_ota"] = "8"
+
+        in_param["checkin"] = citime
+        in_param["checkout"] = cotime
+        in_param["adult_num"] = "2"
+        in_param["children"] = ""
+        in_param["search_id"] = "123456789"
+        in_param["list_query_flag"] = "7"
+        in_param["show_type"] = "1"
+        # in_param["activity_id"] = "2015081441,2015081442"
+        in_param["activity_id"] = ""
+        # print "origin: ", type(in_param)
+        in_param_json = json.dumps(in_param)
+        # print "dict 2 json: ", type(in_param_json)
+        in_param_dict = json.loads(in_param_json)
+        info = readDict.readAPInfo(rule[4])
 
 
-if offset != 0 :
-    # set param
-    in_param = {}
-    # in_param["ip"] = "192.168.14.170"
-    in_param["ip"] = "192.168.232.40"
-    in_param["port"] = "6300"
-    in_param["booking_channel"] = rule[1]
-    in_param["order_from"] = "50"
-    in_param["customer_level"] = "1"
-    # in_param["user_ip"] = "127.0.0.1"
-    in_param["hotel_id"] = rule[0]
-    in_param["filter_ota"] = "8"
-
-    in_param["checkin"] = citime
-    in_param["checkout"] = cotime
-    in_param["adult_num"] = "2"
-    in_param["children"] = ""
-    in_param["search_id"] = "123456789"
-    in_param["list_query_flag"] = "7"
-    in_param["show_type"] = "1"
-    # in_param["activity_id"] = "2015081441,2015081442"
-    in_param["activity_id"] = ""
-    # print "origin: ", type(in_param)
-    in_param_json = json.dumps(in_param)
-    # print "dict 2 json: ", type(in_param_json)
-    in_param_dict = json.loads(in_param_json)
-    info = readDict.readAPInfo(rule[4])
-
-
-    rlt = detail(in_param_json)
-    jrlt = json.loads(rlt)
-    if jrlt['service_status']['msg'] == 'success' :
-        b_s_price = jrlt['detail_response']['detail_hotel']['detail_ota_list'][0]['room_list'][0]['product_list'][0]['base_sale_price']['total_price']['amount']
-        ori_price = jrlt['detail_response']['detail_hotel']['detail_ota_list'][0]['room_list'][0]['product_list'][0]['origin_price']['total_price']['amount']
-        ota = jrlt['detail_response']['detail_hotel']['detail_ota_list'][0]['ota_id']
-        # mbl parse
-        base = jrlt['detail_response']['detail_hotel']['detail_ota_list'][0]['base_price']['total_price']['amount']
-        cost = jrlt['detail_response']['detail_hotel']['detail_ota_list'][0]['room_list'][0]['product_list'][0]['cost_price']['total_price']['amount']
-        rate = (base - cost) / base
-        b = float(rule[3])
-        if b > 1 :
-            h_beat = [info['beat_info']['beat_copy_list'][0]['H'], info[1]['beat_info']['beat_copy_list'][1]['H'], info[1]['beat_info']['beat_modify_price']['H']]
-            c_beat = [info['beat_info']['beat_copy_list'][0]['C'], info[1]['beat_info']['beat_copy_list'][1]['C'], info[1]['beat_info']['beat_modify_price']['C']]
-            if int(rule[1]) == 256:
-                qt = info['beat_info']['tts_QT']
-                qp = info['beat_info']['tts_QP']
+        rlt = detail(in_param_json)
+        jrlt = json.loads(rlt)
+        if jrlt['service_status']['msg'] == 'success' :
+            b_s_price = jrlt['detail_response']['detail_hotel']['detail_ota_list'][0]['room_list'][0]['product_list'][0]['base_sale_price']['total_price']['amount']
+            ori_price = jrlt['detail_response']['detail_hotel']['detail_ota_list'][0]['room_list'][0]['product_list'][0]['origin_price']['total_price']['amount']
+            ota = jrlt['detail_response']['detail_hotel']['detail_ota_list'][0]['ota_id']
+            # mbl parse
+            base = jrlt['detail_response']['detail_hotel']['detail_ota_list'][0]['base_price']['total_price']['amount']
+            cost = jrlt['detail_response']['detail_hotel']['detail_ota_list'][0]['room_list'][0]['product_list'][0]['cost_price']['total_price']['amount']
+            rate = (base - cost) / base
+            b = float(rule[3])
+            if b > 1 :
+                h_beat = [info['beat_info']['beat_copy_list'][0]['H'], info[1]['beat_info']['beat_copy_list'][1]['H'], info[1]['beat_info']['beat_modify_price']['H']]
+                c_beat = [info['beat_info']['beat_copy_list'][0]['C'], info[1]['beat_info']['beat_copy_list'][1]['C'], info[1]['beat_info']['beat_modify_price']['C']]
+                if int(rule[1]) == 256:
+                    qt = info['beat_info']['tts_QT']
+                    qp = info['beat_info']['tts_QP']
+                else :
+                    qt = 0
+                    qp = 0
+                mbl_math.beat(base, b, h_beat, c_beat, qt, qp)
             else :
-                qt = 0
-                qp = 0
-            mbl_math.beat(base, b, h_beat, c_beat, qt, qp)
+                h_lose = [info['lose_info']['lose_copy_price']['H'], info['lose_info']['lose_modify_price']['H']]
+                c_lose = [info['lose_info']['lose_copy_price']['C'], info['lose_info']['lose_modify_price']['C']]
+                f_lose = [info['lose_info']['lose_copy_base_price']['F'], info['lose_info']['lose_modify_base_price']['F']]
+                e_lose = [info['lose_info']['lose_copy_base_price']['E'], info['lose_info']['lose_modify_base_price']['E']]
+                if int(rule[1]) == 256:
+                    qt = info['lose_info']['tts_QT']
+                    qp = info['lose_info']['tts_QP']
+                else :
+                    qt = 0
+                    qp = 0
+                mbl_math.lose(base, b, h_lose, c_lose, f_lose, e_lose, rate, qt, qp)
         else :
-            h_lose = [info['lose_info']['lose_copy_price']['H'], info['lose_info']['lose_modify_price']['H']]
-            c_lose = [info['lose_info']['lose_copy_price']['C'], info['lose_info']['lose_modify_price']['C']]
-            f_lose = [info['lose_info']['lose_copy_base_price']['F'], info['lose_info']['lose_modify_base_price']['F']]
-            e_lose = [info['lose_info']['lose_copy_base_price']['E'], info['lose_info']['lose_modify_base_price']['E']]
-            if int(rule[1]) == 256:
-                qt = info['lose_info']['tts_QT']
-                qp = info['lose_info']['tts_QP']
-            else :
-                qt = 0
-                qp = 0
-            mbl_math.lose(base, b, h_lose, c_lose, f_lose, e_lose, rate, qt, qp)
+            continue
