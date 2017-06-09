@@ -199,7 +199,7 @@ while(1):
             if b > 1 :
                 h_beat = [info['beat_info']['beat_copy_list'][0]['H'], info[1]['beat_info']['beat_copy_list'][1]['H'], info[1]['beat_info']['beat_modify_price']['H']]
                 c_beat = [info['beat_info']['beat_copy_list'][0]['C'], info[1]['beat_info']['beat_copy_list'][1]['C'], info[1]['beat_info']['beat_modify_price']['C']]
-                if int(rule[1]) == 256:
+                if int(rule[1]) == 256 and info['beat_info']['tts_QT']:
                     qt = info['beat_info']['tts_QT']
                     qp = info['beat_info']['tts_QP']
                 else :
