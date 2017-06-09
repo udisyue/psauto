@@ -187,7 +187,7 @@ while(1):
 
         rlt = detail(in_param_json)
         jrlt = json.loads(rlt)
-        if jrlt['service_status']['msg'] == 'success' :
+        if jrlt['service_status']['msg'] == 'success' and jrlt['detail_response']['detail_hotel']['detail_ota_list'][0]['room_list']:
             b_s_price = jrlt['detail_response']['detail_hotel']['detail_ota_list'][0]['room_list'][0]['product_list'][0]['base_sale_price']['total_price']['amount']
             ori_price = jrlt['detail_response']['detail_hotel']['detail_ota_list'][0]['room_list'][0]['product_list'][0]['origin_price']['total_price']['amount']
             ota = jrlt['detail_response']['detail_hotel']['detail_ota_list'][0]['ota_id']
