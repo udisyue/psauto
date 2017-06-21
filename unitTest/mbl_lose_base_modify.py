@@ -171,7 +171,7 @@ if offset != 0 :
     in_param["order_from"] = "50"
     in_param["customer_level"] = "1"
     # in_param["user_ip"] = "127.0.0.1"
-    in_param["hotel_id"] = 324743
+    in_param["hotel_id"] = "324743"
     in_param["filter_ota"] = "524286"
 
     in_param["checkin"] = citime
@@ -229,3 +229,6 @@ if offset != 0 :
                     print '#####base sale price = modify  price, auto price success'
                 else:
                     print '#####base sale price != modify price, auto price failed'
+
+writeDict.fileRecov('/home/work/idata/price/dict/base/auto_price_rule.dict')
+writeDict.fileRecov('/home/work/idata/price/dict/base/auto_price_info.dict')

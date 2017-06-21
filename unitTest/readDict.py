@@ -4,7 +4,7 @@ import time
 import re
 import json
 def readAPRule(start, tstamp):
-    fo = open('auto_price_rule.dict','r')
+    fo = open('/home/work/idata/price/dict/base/auto_price_rule.dict','r')
     ruleBuf = fo.readlines()
     for cnt in range(start,len(ruleBuf)) :
         content = re.sub(r'\n', "", ruleBuf[cnt])
@@ -23,7 +23,7 @@ def readAPRule(start, tstamp):
     return offset,rule
 
 def readAPInfo(id):
-    fo = open('auto_price_info.dict','r')
+    fo = open('/home/work/idata/price/dict/base/auto_price_info.dict','r')
     infoBuf = fo.readlines()
     for cnt in range(0,len(infoBuf)):
         content = re.sub(r'\n',"", infoBuf[cnt])
