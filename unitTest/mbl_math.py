@@ -16,6 +16,7 @@ def beat(base, b, h_beat, c_beat, qt, qp) :
     print ("copy_price1_tts = %f" % cp1_tts)
     print ("copy_price2_tts = %f" % cp2_tts)
     print ("modify_price_tts = %f" % mprice)
+    return copy_price1, copy_price2, modify_price, cp1_tts, cp2_tts, mprice
 
 def lose(base, b, h_lose, c_lose, f_lose, e_lose, rate, qt, qp) :
     copy_base = base * (1 - rate) * (1 + f_lose[0]) + e_lose[0]
@@ -35,6 +36,7 @@ def lose(base, b, h_lose, c_lose, f_lose, e_lose, rate, qt, qp) :
     print ("copy_price_tts = %f"%copyprice_tts)
     print ("modify_base_tts = %f"%mbase_tts)
     print ("modify_price_tts = %f"%mprice_tts)
+    return copy_base, copy_price, modify_base, modify_price, copybase_tts, copyprice_tts, mbase_tts, mprice_tts
 
 def main():
     base = 29000

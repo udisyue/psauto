@@ -67,11 +67,9 @@ def readManualDis(id):
 def idChcek(id, tstamp, channel):
     fo = open('auto_price_rule.dict', 'r')
     ruleBuf = fo.readlines()
-    print ruleBuf
     for cnt in range(0, len(ruleBuf)):
         content = re.sub(r'\n', "", ruleBuf[cnt])
         tmprule = content.split('\t')
-        print cnt
         if tmprule[0] == id and tmprule[1] == channel and tmprule[2] == tstamp:
             fo.close()
             flag = 1
