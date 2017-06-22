@@ -234,7 +234,6 @@ while(1):
     in_param_json = json.dumps(in_param)
     # print "dict 2 json: ", type(in_param_json)
     in_param_dict = json.loads(in_param_json)
-    info = readDict.readAPInfo(rule[4])
     rlt = detail(in_param_json)
     jrlt = json.loads(rlt)
     if jrlt['service_status']['msg'] == 'success' and jrlt['detail_response']['detail_hotel']['detail_ota_list'][0]['hotel_status']==2:
@@ -269,7 +268,7 @@ in_param["room_num"] = "2"
 in_param["show_type"] = "1"
 in_param_json = json.dumps(in_param)
 in_param_dict = json.loads(in_param_json)
-bk_rlt = main(in_param_json)
+bk_rlt = booking(in_param_json)
 bk_jrlt = json.loads(bk_rlt)
 if bk_jrlt['service_status']['msg'] == 'success' :
     print "########## booking response success"
