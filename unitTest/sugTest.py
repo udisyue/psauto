@@ -127,3 +127,47 @@ def sug_get(fname):
     finally:
         s.close()
     return response
+
+def sug_hotRegion(dest_name):
+    nshead = struct.Struct("HHI16sIII")
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    request = None
+    response = None
+    param = [2,10,dest_name,[1,2,3,4,5,6]]
+    try:
+        # connect
+        s.connect((HOST, PORT))
+        # send
+        request, msg, length = build_message(nshead, param)
+        head = nshead.pack(1, 1, 1, "elong", 1, 0, length)
+        s.sendall(head)
+        s.sendall(msg)
+        # receive
+        # time.sleep(1)
+        data = s.recv(nshead.size)
+        # print len(data)
+        if len(data) == nshead.size:
+            head_id, version, log_id, provider, magic, method_id, body_len = \
+                nshead.unpack(data)
+
+            if body_len != 0:
+                serialized_msg = ""
+                len_left = body_len
+                while len_left > 0:
+                    buf_size = len_left if len_left < 1024 else 1024
+                    temp_buf = s.recv(buf_size)
+                    serialized_msg += temp_buf
+                    len_left -= len(temp_buf)
+                response = handle_response(serialized_msg)
+            else:
+                print "Received an empty message"
+        else:
+            logging.warning("Receive bad nshead header, length=%d", len(data))
+
+        s.close()
+    except socket.error, e:
+        logging.warning(e)
+        traceback.print_exc()
+    finally:
+        s.close()
+    return response

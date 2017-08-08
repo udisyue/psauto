@@ -272,3 +272,5 @@ bk_rlt = booking(in_param_json)
 bk_jrlt = json.loads(bk_rlt)
 if bk_jrlt['service_status']['msg'] == 'success' :
     print "########## booking response success"
+if bk_jrlt['booking_response']['detail_hotel']['detail_ota_list'][0]['room_list'][0]['product_list'][0]['promotion_info'][0]['type'] == 7 :
+    print "########## promotion info success"

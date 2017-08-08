@@ -20,9 +20,11 @@ print cflist
 checklist=[]
 for cnt in range(0,len(cflist)):
     response = sugTest.sug_get(path+'/'+cflist[cnt])
+    #each_len是sug_response的结果个数
     each_len = len(response.sug_response)
     print path+'/'+cflist[cnt]
     checklist = read_conf.read_sug(path+'/'+cflist[cnt])
+    #逐个检查sug结果中的字段
     for sugr_cnt in range(0,each_len):
         #checkpoint 1: keywords
         chk1 = assert_func.ifcontent_in(checklist[4], response.sug_response[sugr_cnt].name_cn.encode("utf8"))

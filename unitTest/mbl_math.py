@@ -39,17 +39,17 @@ def lose(base, b, h_lose, c_lose, f_lose, e_lose, rate, qt, qp) :
     return copy_base, copy_price, modify_base, modify_price, copybase_tts, copyprice_tts, mbase_tts, mprice_tts
 
 def main():
-    base = 29000
-    b = 0.4931
-    h_beat = [0.90000000000000002,0.90000000000000002,0.90000000000000002]
+    base = 32702
+    b = 0.961
+    h_beat = [0.80000000000000001,0.80000000000000001,0.90000000000000002]
     c_beat = [900,0,900]
-    h_lose = [1.0,0.0]
+    h_lose = [0.8,0.8]
     c_lose = [0,0]
-    f_lose = [0.0,0.0]
+    f_lose = [0.0,0.05]
     e_lose = [0,0]
     f = 0.02
     e  = 0
-    cost = 26680
+    cost = 27681
     qt = 0.19
     qp = 10000
     rate = (base - cost) / base

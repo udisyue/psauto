@@ -3,6 +3,7 @@
 import time
 import re
 import json
+import sys
 def readAPRule(start, tstamp):
     fo = open('/home/work/idata/price/dict/base/auto_price_rule.dict','r')
     ruleBuf = fo.readlines()
@@ -91,3 +92,17 @@ def idChcek(id, tstamp, channel):
     return flag
 
 
+def readRuleblk():
+    fo = open('/home/work/idata/price/dict/base/rule_blacklist.dict', 'r')
+    ruleBuf = fo.readlines()
+    tmprule = ruleBuf[-1]
+    rule = tmprule.split('\t')
+    fo.close()
+    return rule
+
+def selfName():
+    argv0_list = sys.argv[0].split("\\");
+    script_name = argv0_list[len(argv0_list) - 1];  # get script file name self
+    script_name = script_name[0:-3];
+    script_name = script_name.split('/')[-1]
+    return script_name

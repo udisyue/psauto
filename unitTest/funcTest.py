@@ -9,14 +9,17 @@ import sug_service_pb2
 import assert_func
 import log_write
 import readDict
+import sys
+import os
+import re
 #print redisOp.get_multiActi(157, 43, 633344, 190000032101382281)
 #print redisOp.get_joinnum(157, 43)
 #redisOp.del_multiActi_value(157, 43, 633344, 190000032101382281)
 #print redisOp.set_multiActi_value_0(157, 43, 633344, 190000032101382281)
 #param = read_conf.read_sug('sug001.conf')
 #print param
-response = sugTest.sug_get('./sug_case/same_annouce001.conf')
-print response.__unicode__().encode("utf8")
+#response = sugTest.sug_get('./sug_case/noresult_2.conf')
+#print response.__unicode__().encode("utf8")
 #print response
 #print response.split('\n')
 #jresp = json.dumps(response.split('\n'))
@@ -45,3 +48,13 @@ print info
 flag = readDict.idChcek(220672,20170717,32)
 print flag
 '''
+#print readDict.selfName()
+def region_match(rid):
+    dest = open('dest_info.txt','r')
+    content = dest.readlines()
+    for i in range(1,len(content)):
+        if re.match(rid, content[i]):
+            break
+    return content[i]
+print region_match('178236')
+print region_match('178236').split('\t')[4]

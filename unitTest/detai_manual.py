@@ -189,5 +189,5 @@ if flag == 0 :
     jrlt = json.loads(rlt)
 
     if jrlt['service_status']['msg'] == 'success' :
-        if ['list_response']['list_hotel'][0]['promotion_info'][2]['tpye']=13 :
+        if ['list_response']['list_hotel'][0]['promotion_info'][2]['tpye']==13 :
             print "success"
